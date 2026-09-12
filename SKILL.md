@@ -1,6 +1,6 @@
 ---
 name: clarify-first-delizade
-description: Scope and clarify features, updates, or architecture. Prompts interactive modal panels via ask_question tool, updates existing plan documents in-place (or compiles a new plan), and STOPS without touching source code.
+description: Scope and clarify features, updates, or architecture. Prompts interactive modal panels via ask_question tool, updates existing plan documents in-place with zero data loss (or compiles a new plan), and STOPS without touching source code.
 ---
 
 <!--
@@ -19,16 +19,16 @@ of two foundational skills:
    - Interactive Modal / Panel UI: Questions are presented directly in the IDE's interactive modal panel (`ask_question` tool) rather than raw chat text, featuring selectable options and an explicit `(Recommended)` first option.
    - Sequential Low-Cognitive-Load Interaction: Questions are asked strictly ONE AT A TIME.
    - Early Termination & Scope Control: Avoids over-questioning; terminates as soon as the core path is clear.
-   - Plan Synthesis & In-Place Refinement: Compiles settled decisions into an execution-ready plan or weaves them directly into an existing plan document.
+   - Plan Synthesis & In-Place Refinement: Compiles settled decisions into an execution-ready plan or weaves them directly into an existing plan document with zero data loss.
 
-3. Delizade Directive (Strict Plan-Only & In-Place Update Invariant):
+3. Delizade Directive (Strict Plan-Only & Zero-Loss In-Place Update Invariant):
    - Scope is strictly limited to clarification, decision resolution, and implementation planning.
    - The agent MUST NOT touch application source code (`src/`), database migrations, or build commands.
-   - If an existing plan document is referenced or active, the agent updates that document directly in-place. It stops immediately upon delivering or updating the plan.
+   - If an existing plan document is referenced or active, the agent updates that document directly in-place with absolute preservation of established rules, invariants, and notes. It stops immediately upon delivering or updating the plan.
 ================================================================================
 -->
 
-Turn feature ideas, component/system updates, architectural decisions, or refactoring requests into execution-ready build specifications through autonomous codebase exploration, sequential interactive modal panels, and in-place plan refinement or concise plan compilation.
+Turn feature ideas, component/system updates, architectural decisions, or refactoring requests into execution-ready build specifications through autonomous codebase exploration, sequential interactive modal panels, and zero-loss in-place plan refinement or concise plan compilation.
 
 ---
 
@@ -42,7 +42,7 @@ flowchart TD
     Phase1 --> UserAnswer["User Panel Selection / Input"]
     UserAnswer --> Recompute["Recompute Design Tree & Prune Irrelevant Branches"]
     Recompute --> TreeEval
-    TreeEval -- "No (Settled / Frontier Empty)" --> Phase2["Phase 2: In-Place Plan Update OR Deliver New Plan"]
+    TreeEval -- "No (Settled / Frontier Empty)" --> Phase2["Phase 2: In-Place Plan Update (Zero-Loss) OR Deliver New Plan"]
     Phase2 --> Stop["Plan Ready / Updated<br/>(Execution HALTED - Zero Source Code Changes)"]
 ```
 
@@ -90,8 +90,11 @@ Once the frontier is resolved and no ambiguities remain, the agent delivers the 
 
 ### Mode A: In-Place Plan Update (When an Existing Plan Document Exists)
 If the user provides a plan document, references one in the prompt, or is actively working on a plan file (e.g. `docs/plan-*.md`, `implementation_plan.md`):
-1. **Direct In-Place Modification**: Update the target plan document directly on disk using file editing tools (`replace_file_content` or `write_to_file`).
-2. **Surgical Integration**: Cleanly weave the resolved architectural decisions, new rules, and updated phases into the document's existing structure. Prune obsolete sections without creating duplicate files or orphaned drafts.
+1. **Direct In-Place Modification**: Update the target plan document directly on disk using surgical file editing tools (`replace_file_content` or `write_to_file`).
+2. **Zero-Loss Plan Preservation Protocol (CRITICAL)**:
+   - **Absolute Retention of Established Knowledge**: Never summarize away, compress, or silently delete existing architectural invariants, domain rules, mathematical formulas, notes, creative context, or acceptance criteria already established in the document.
+   - **Strict Surgicality**: Content modification or removal is permitted ONLY for the exact lines, fields, or blocks directly and intentionally superseded by the newly settled decision. All unaffected sections must remain 100% intact.
+   - **Structural Migration Safety**: If detailing, splitting, or reorganizing zones, dependency hierarchies, or file topologies, every existing rule and note from the previous structure must be carefully carried over into the updated layout. Zero data loss.
 3. **No Chat Bloat**: Do NOT dump the entire plan text into the chat conversation. Provide a concise, bulleted changelog highlighting what was updated in the plan file, and link to the updated document.
 
 ### Mode B: Greenfield Plan Delivery (When No Plan Document Exists)
@@ -103,11 +106,12 @@ If no existing plan document is referenced, compile a single, dense, execution-r
 
 ---
 
-## 🛑 CRITICAL INVARIANT: SOURCE CODE LOCK (ZERO CODE EXECUTION)
+## 🛑 CRITICAL INVARIANTS: SOURCE CODE LOCK & ZERO DATA LOSS
 
 This skill is strictly a **clarification and planning** skill.
 1. **Source Code is Locked**: Under NO circumstances should the agent modify application source code (`src/`), run database migrations, install packages, or execute build commands.
 2. **Permitted File Modifications**: The ONLY allowed file write/edit operations are on the designated plan or architecture documentation files (e.g., `docs/plan-*.md`, `implementation_plan.md`).
-3. **Explicit Handoff**: After updating or delivering the plan, explicitly notify the user:
+3. **Zero-Loss Plan Integrity**: When updating an existing plan, never truncate, drop, or summarize established context. Edits must be surgical and purely augmentative/substitutive for the specific decisions made.
+4. **Explicit Handoff**: After updating or delivering the plan, explicitly notify the user:
    > *"Plan dökümanı güncellendi / hazırlandı. Planı inceleyip onayladığınızda veya başlamak istediğinizde uygulamaya geçebiliriz."*
-4. **HALT EXECUTION IMMEDIATELY**: Do not start code implementation. Wait for the user's explicit approval to execute.
+5. **HALT EXECUTION IMMEDIATELY**: Do not start code implementation. Wait for the user's explicit approval to execute.
