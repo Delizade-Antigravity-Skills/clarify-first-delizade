@@ -1,6 +1,6 @@
 ---
 name: clarify-first-delizade
-description: Scope and clarify features, updates, or architecture through a relentless, continuous interview loop. Prompts interactive modal panels via ask_question tool, updates existing plan documents in-place with zero data loss (or compiles a new plan), and STOPS without touching source code.
+description: Scope and clarify features, updates, or architecture through a relentless, continuous interview loop. Prompts interactive modal panels via ask_question tool, updates existing plan documents in-place every two questions with zero data loss (or compiles a new plan), and STOPS without touching source code.
 ---
 
 <!--
@@ -19,16 +19,17 @@ of two foundational skills:
 2. `ask-then-build` (by David Ondrej):
    - Interactive Modal / Panel UI: Questions are presented directly in the IDE's interactive modal panel (`ask_question` tool) rather than raw chat text, featuring selectable options and an explicit `(Recommended)` first option.
    - Sequential Low-Cognitive-Load Interaction: Questions are asked strictly ONE AT A TIME.
-   - Plan Synthesis & In-Place Refinement: Compiles settled decisions into an execution-ready plan or weaves them directly into an existing plan document with zero data loss.
+   - 2-Question Incremental Plan Sync: Automatically persists decisions to the plan document every 2 questions, preventing context loss and maintaining an evolving specification.
+   - Plan Synthesis & In-Place Refinement: Weaves settled decisions directly into an existing plan document with zero data loss (or compiles an execution-ready plan).
 
 3. Delizade Directive (Strict Plan-Only & Zero-Loss In-Place Update Invariant):
    - Scope is strictly limited to clarification, decision resolution, and implementation planning.
    - The agent MUST NOT touch application source code (`src/`), database migrations, or build commands.
-   - If an existing plan document is referenced or active, the agent updates that document directly in-place with absolute preservation of established rules, invariants, and notes. It stops immediately upon delivering or updating the plan.
+   - If an existing plan document is referenced or active, the agent updates that document directly in-place every 2 questions with absolute preservation of established rules, invariants, and notes. It stops immediately upon delivering or finalizing the plan.
 ================================================================================
 -->
 
-Turn feature ideas, component/system updates, architectural decisions, or refactoring requests into execution-ready build specifications through autonomous codebase exploration, sequential interactive modal panels, continuous deep grilling, and zero-loss in-place plan refinement or concise plan compilation.
+Turn feature ideas, component/system updates, architectural decisions, or refactoring requests into execution-ready build specifications through autonomous codebase exploration, sequential interactive modal panels, continuous deep grilling, 2-question incremental in-place plan synchronization, and zero-loss plan refinement.
 
 ---
 
@@ -38,13 +39,14 @@ Turn feature ideas, component/system updates, architectural decisions, or refact
 flowchart TD
     Idea["User Feature / Update / Refactor / Plan Doc"] --> Phase0["Phase 0: Silent Fact-Finding<br/>(Grep, Inspect Codebase, Verify Types & Target Plan)"]
     Phase0 --> TreeEval{"Is there an open decision,<br/>hidden seam, or edge case?"}
-    TreeEval -- "Yes" --> Phase1["Phase 1: Ask Next Frontier Question<br/>(Interactive Modal Panel via ask_question Tool)"]
-    Phase1 --> UserAnswer["User Panel Selection / Input"]
-    UserAnswer --> Recompute["Recompute Design Tree & Surface Next Seam"]
-    Recompute --> HasMore{"Are there more architectural<br/>dimensions to harden?"}
-    HasMore -- "Yes (Continue Grilling Loop)" --> Phase1
-    HasMore -- "No (Thoroughly Hardened / User Ready)" --> Phase2["Phase 2: In-Place Plan Update (Zero-Loss) OR Deliver New Plan"]
-    Phase2 --> Stop["Plan Ready / Updated<br/>(Execution HALTED - Zero Source Code Changes)"]
+    TreeEval -- "Yes" --> QPanel["Ask Frontier Question via ask_question Modal Panel"]
+    QPanel --> UserAns["User Panel Selection / Input"]
+    UserAns --> CycleCheck{"Is this the 2nd question<br/>in the current cycle?"}
+    CycleCheck -- "Yes (Every 2 Questions)" --> SyncDoc["Surgical In-Place Plan Update<br/>(Zero Data Loss on Target Plan Doc)"]
+    SyncDoc --> TreeEval
+    CycleCheck -- "No (1st of cycle)" --> TreeEval
+    TreeEval -- "No (Grilling Complete / User Ready)" --> Finalize["Final Plan Check & Handoff"]
+    Finalize --> Stop["Plan Ready / Updated<br/>(Execution HALTED - Zero Source Code Changes)"]
 ```
 
 ---
@@ -54,7 +56,7 @@ flowchart TD
 1. **Facts belong to the AI, never the user.** Before asking anything, autonomously inspect the repository using available search and read tools:
    - Identify affected files, call sites, exports, interfaces, domain services, database schemas, and existing UI components.
    - Trace existing behaviors, edge cases, regression risks, architectural rules, and design system tokens.
-   - Detect if an existing plan document is active or referenced (e.g., `docs/plan-*.md`, `implementation_plan.md`, or a file mentioned in context).
+   - Detect if an existing plan document is active or referenced (e.g., `docs/plan-*.md`, `implementation_plan.md`, or a file currently open/mentioned in context).
 2. **Never ask the user for facts you can look up yourself.** If a file path, function signature, current implementation, or configuration can be grepped, find it silently.
 3. Formulate questions **only** for genuine business, architectural, UI/UX, or behavioral decisions where multiple valid tradeoffs or update strategies exist.
 
@@ -62,9 +64,9 @@ flowchart TD
 
 ## Phase 1 — Continuous Interactive Grilling Loop (`ask_question` Modal Tool)
 
-1. **Continuous Multi-Round Interview (CRITICAL — Anti-Premature Exit)**:
+1. **Continuous Multi-Round Interview (Anti-Premature Exit)**:
    - **Never stop after just 1 or 2 questions.** Grilling is an exhaustive, rigorous process to interrogate assumptions, resolve trade-offs, and harden the architecture before code is written.
-   - Do NOT rush to Phase 2. Systematically traverse all key architectural dimensions across the frontier:
+   - Do NOT rush to complete. Systematically traverse all key architectural dimensions across the frontier:
      1. **Domain Ontology & Storage Seams**: SSOT, disk files vs SQLite, manifests, persistence guarantees.
      2. **State Lifecycles & Invariants**: State transitions (`Draft -> Provisional -> Canon`), rollbacks, failure recovery.
      3. **Cognitive Contracts & AI Gating**: Zod schemas, prompt compiling, fail-fast zero-fabrication boundaries.
@@ -74,7 +76,7 @@ flowchart TD
 
 2. **Sequential One-at-a-Time Execution**:
    - Ask strictly **ONE question at a time**. Never bundle multiple questions together.
-   - After each answer, update the internal decision model, identify the next most pivotal seam, and ask the next question immediately.
+   - Present every question through the `ask_question` modal panel tool.
 
 3. **Mandatory Interactive Modal / Panel Invariant (CRITICAL)**:
    <formatting_directive priority="critical">
@@ -91,42 +93,48 @@ flowchart TD
 
 5. Execution is blocked in the IDE until the user clicks an option and presses Submit in the modal panel.
 
-6. **Loop Continuation & Finalization**:
-   - Continue the loop across all open dimensions.
-   - Transition to Phase 2 ONLY when:
-     1. All critical architectural dimensions, seams, and edge cases have been exhaustively probed and resolved, OR
-     2. The user explicitly requests to finalize the plan (e.g. via write-in or option).
+6. **⚡ Incremental In-Place Document Sync Cadence (Every 2 Questions)**:
+   <sync_directive cadence="every_2_questions" priority="critical">
+   - **Her 2 Soruda Bir Güncelleme (2-Question Cadence)**: Her 2 soru ve cevap tamamlandığında (1. ve 2. soru, ardından 3. ve 4. soru vb.), hedef plan dökümanını (`docs/plan-*.md` veya `implementation_plan.md`) o ana kadar kesinleşen kararlara göre doğrudan disk üzerinde cerrahi olarak güncelle (`replace_file_content` veya `write_to_file`).
+   - **Zero-Loss Prensibi (Sıfır Veri Kaybı)**: Güncelleme sırasında dökümandaki mevcut kurallar, mimari değişmezler, kabul kriterleri ve notlar %100 korunur. Asla özetleme, silme veya kısaltma yapılmaz; sadece yeni kararlar dökümanın ilgili bölümlerine cerrahi olarak eklenir veya güncellenir.
+   - **Grilling'e Derhal Geri Dönüş (Resume Grilling Immediately)**: Döküman güncellendikten sonra sohbette uzun metinler basarak duraklama; hemen sıradaki soruyu (`ask_question` modal paneli) açarak grilling döngüsünü kesintisiz devam ettir.
+   </sync_directive>
+
+7. **Loop Continuation & Finalization**:
+   - Grilling döngüsü tüm mimari boyutlar ve kısıtlar taranana kadar devam eder.
+   - Döngü YALNIZCA şu iki durumda tamamlanır:
+     1. Tüm kritik mimari boyutlar, dikişler ve uç durumlar eksiksiz sorgulanıp plana işlendiğinde, VEYA
+     2. Kullanıcı planı sonlandırmak istediğini açıkça belirttiğinde (seçenek veya write-in ile).
 
 ---
 
 ## Phase 2 — Plan Synthesis & In-Place Refinement
 
-Once the grilling loop is completed and all dimensions are settled, the agent delivers the plan:
+Grilling döngüsü tamamlandığında dökümanın son hali doğrulanır:
 
-### Mode A: In-Place Plan Update (When an Existing Plan Document Exists)
-If the user provides a plan document, references one in the prompt, or is actively working on a plan file (e.g. `docs/plan-*.md`, `implementation_plan.md`):
-1. **Direct In-Place Modification**: Update the target plan document directly on disk using surgical file editing tools (`replace_file_content` or `write_to_file`).
+### Mode A: In-Place Plan Update (Hedef Plan Dökümanı Varsa)
+Kullanıcı bir plan dökümanı sağlamışsa veya aktif olarak bir plan dosyası üzerinde çalışılıyorsa (örneğin `docs/plan-*.md`, `implementation_plan.md`):
+1. **Direct In-Place Modification**: Hedef döküman disk üzerinde cerrahi araçlarla güncellenmiş durumdadır.
 2. **Zero-Loss Plan Preservation Protocol (CRITICAL)**:
-   - **Absolute Retention of Established Knowledge**: Never summarize away, compress, or silently delete existing architectural invariants, domain rules, mathematical formulas, notes, creative context, or acceptance criteria already established in the document.
-   - **Strict Surgicality**: Content modification or removal is permitted ONLY for the exact lines, fields, or blocks directly and intentionally superseded by the newly settled decisions. All unaffected sections must remain 100% intact.
-   - **Structural Migration Safety**: If detailing, splitting, or reorganizing zones, dependency hierarchies, or file topologies, every existing rule and note from the previous structure must be carefully carried over into the updated layout. Zero data loss.
-3. **No Chat Bloat**: Do NOT dump the entire plan text into the chat conversation. Provide a concise, bulleted changelog highlighting what was updated in the plan file, and link to the updated document.
+   - **Absolute Retention of Established Knowledge**: Dökümanda daha önce oluşturulmuş hiçbir kural, mimari invariant, formül, yaratıcı bağlam veya kabul testi silinmez veya özetlenerek küçültülmez.
+   - **Strict Surgicality**: Değişiklikler yalnızca yeni kararların etkilediği bloklara cerrahi olarak uygulanır.
+3. **No Chat Bloat**: Tüm plan metnini sohbete yapıştırma. Yalnızca yapılan güncellemeleri özetleyen 3-4 maddelik kısa bir bildirim ver ve dökümana link ver.
 
-### Mode B: Greenfield Plan Delivery (When No Plan Document Exists)
-If no existing plan document is referenced, compile a single, dense, execution-ready **Implementation Plan**:
-1. **Authoritative Context & Read-First Files**: Target files, schemas, and governing rules (`AGENTS.md`, design tokens, service contracts).
-2. **Concrete Implementation Steps**: Numbered, file-level changes detailing exact modifications without speculative fluff.
-3. **Validation & Verification**: Automated tests, typecheck commands, lint checks, or manual visual validation criteria.
-4. **Execution Boundaries**: Strict scope boundaries (e.g., zero regression on existing interfaces, adhere to design system, no unused dependencies).
+### Mode B: Greenfield Plan Delivery (Henüz Plan Dökümanı Yoksa)
+Eğer ortada bir plan dosyası yoksa, yeni bir **Implementation Plan** derle:
+1. **Authoritative Context & Read-First Files**: Hedef dosyalar, şemalar ve kurallar (`AGENTS.md`, tasarım token'ları, servis kontratları).
+2. **Concrete Implementation Steps**: Numaralandırılmış dosya bazlı net adımlar.
+3. **Validation & Verification**: Otomasyon testleri, tip kontrol komutları veya manuel doğrulama kriterleri.
+4. **Execution Boundaries**: Kapsam sınırları.
 
 ---
 
 ## 🛑 CRITICAL INVARIANTS: SOURCE CODE LOCK & ZERO DATA LOSS
 
-This skill is strictly a **clarification and planning** skill.
-1. **Source Code is Locked**: Under NO circumstances should the agent modify application source code (`src/`), run database migrations, install packages, or execute build commands.
-2. **Permitted File Modifications**: The ONLY allowed file write/edit operations are on the designated plan or architecture documentation files (e.g., `docs/plan-*.md`, `implementation_plan.md`).
-3. **Zero-Loss Plan Integrity**: When updating an existing plan, never truncate, drop, or summarize established context. Edits must be surgical and purely augmentative/substitutive for the specific decisions made.
-4. **Explicit Handoff**: After updating or delivering the plan, explicitly notify the user:
-   > *"Plan dökümanı güncellendi / hazırlandı. Planı inceleyip onayladığınızda veya başlamak istediğinizde uygulamaya geçebiliriz."*
-5. **HALT EXECUTION IMMEDIATELY**: Do not start code implementation. Wait for the user's explicit approval to execute.
+Bu skil kesinlikle bir **netleştirme ve planlama** skilidir.
+1. **Kaynak Kodlar Kilitlidir**: Ajan KESİNLİKLE uygulama kaynak kodlarını (`src/`) değiştiremez, veritabanı migrasyonu çalıştıramaz, paket kuramaz veya derleme komutu veremez.
+2. **İzin Verilen Tek Dosya Değişikliği**: Yalnızca üzerinde anlaşılan plan dökümanı (örneğin `docs/plan-*.md`, `implementation_plan.md`) güncellenebilir.
+3. **Sıfır Veri Kaybı (Zero-Loss)**: Plan güncellenirken mevcut bağlam, formüller veya kurallar asla budanamaz.
+4. **Açık El Sıkışma (Explicit Handoff)**: Plan tamamlandıktan sonra kullanıcıya açıkça bildir:
+   > *"Plan dökümanı başarıyla güncellendi ve tüm kararlar dökümana işlendi. Planı inceleyip onayladığınızda veya başlamak istediğinizde uygulamaya geçebiliriz."*
+5. **HALT EXECUTION IMMEDIATELY**: Kod uygulamasına KESİNLİKLE başlama. Kullanıcının açık onayını bekle.

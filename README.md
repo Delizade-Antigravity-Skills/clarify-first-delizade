@@ -1,6 +1,6 @@
 # Clarify First (Clarify & Plan Protocol - Delizade Edition)
 
-An Antigravity & Agentic IDE Skill that unifies autonomous codebase fact-finding, dynamic decision tree traversal, interactive modal panel questioning (`ask_question` tool), and concise execution-ready implementation plan synthesis without auto-executing.
+An Antigravity & Agentic IDE Skill that unifies autonomous codebase fact-finding, dynamic decision tree traversal, interactive modal panel questioning (`ask_question` tool), continuous deep grilling, and **2-question incremental in-place plan document synchronization with zero data loss**.
 
 ## Overview
 
@@ -11,15 +11,15 @@ When designing features, refactoring architecture, or clarifying specifications,
 `clarify-first-delizade` provides a streamlined, zero-overhead alignment loop:
 - **Silent Fact-Finding (AI Owns Facts):** The agent autonomously inspects existing files, types, routes, and tokens. It never burdens the user with trivia that can be grepped.
 - **Interactive Modal Panel Alignment (User Owns Decisions):** Open architectural decisions are queried strictly **ONE AT A TIME** directly inside the IDE's interactive UI panel/modal dialog (`ask_question` tool) with clickable options and an explicit agent recommendation (**`(Recommended)`**). No raw question text cluttering chat.
-- **Dynamic Tree Pruning:** Each user answer immediately reshapes the decision tree, pruning irrelevant downstream branches and preventing useless questions.
-- **Plan-Only Invariant (No Auto-Execution):** Settled decisions are compiled into a concrete implementation plan, and execution halts immediately for user review without modifying code.
+- **⚡ 2-Question Incremental In-Place Sync Cadence:** Every 2 questions answered, the agent immediately persists settled decisions into the active plan document on disk (`docs/plan-*.md` or `implementation_plan.md`) with **Zero Data Loss**, ensuring progress is never lost, and immediately resumes the grilling loop.
+- **Plan-Only Invariant (No Auto-Execution):** The agent stops immediately upon completing or updating the plan. It is strictly prohibited from touching application source code (`src/`).
 
 ## Origins & Synthesis
 
 This skill is a unified synthesis and architectural evolution of two foundational skills:
-* **`grilling` (Antigravity Core / Gemini):** Provides the dynamic decision tree (frontier) model and the strict invariant that codebase fact-finding is the AI's autonomous responsibility.
-* **`ask-then-build` (by David Ondrej):** Provides the low-cognitive-load, sequential single-question format (now elevated to interactive modal UI panels).
-* **Delizade Directive:** Plan-only execution boundary that guarantees the agent never starts editing code or running migrations until the user explicitly requests implementation.
+* **`grilling` (Antigravity Core / Gemini):** Provides the dynamic decision tree (frontier) model, continuous deep interview rigor, and the strict invariant that codebase fact-finding is the AI's autonomous responsibility.
+* **`ask-then-build` (by David Ondrej):** Provides the low-cognitive-load, sequential single-question format (elevated to interactive modal UI panels).
+* **Delizade Directive:** Plan-only execution boundary that guarantees the agent never touches source code (`src/`), combined with the 2-question in-place plan sync protocol with zero data loss.
 
 ## Installation
 
@@ -38,4 +38,4 @@ cp SKILL.md .agents/skills/clarify-first-delizade/SKILL.md
 ```
 
 ## Structure
-- [`SKILL.md`](SKILL.md): Authoritative operational rules, workflow phases, modal panel directives, and plan synthesis specifications.
+- [`SKILL.md`](SKILL.md): Authoritative operational rules, workflow phases, modal panel directives, 2-question sync cadence, and plan synthesis specifications.
