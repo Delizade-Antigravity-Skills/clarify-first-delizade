@@ -1,6 +1,6 @@
 ---
 name: clarify-first-delizade
-description: Scope and clarify features, updates, or architecture. Prompts interactive modal panels via ask_question tool, updates existing plan documents in-place with zero data loss (or compiles a new plan), and STOPS without touching source code.
+description: Scope and clarify features, updates, or architecture through a relentless, continuous interview loop. Prompts interactive modal panels via ask_question tool, updates existing plan documents in-place with zero data loss (or compiles a new plan), and STOPS without touching source code.
 ---
 
 <!--
@@ -12,13 +12,13 @@ of two foundational skills:
 
 1. `grilling` (Antigravity Core / Gemini):
    - Autonomous Fact-Finding: AI autonomously inspects the codebase/environment rather than burdening the user with factual questions.
+   - Relentless Continuous Interview: Interrogates assumptions, uncovers hidden seams, and explores edge cases without prematurely cutting the interview short.
    - Dynamic Decision Tree (Frontier): Models architectural problems as a dependency graph where resolved decisions unlock downstream branches and prune irrelevant ones.
    - Anti-Assumption Rigor: Prevents proceeding on silent assumptions.
 
 2. `ask-then-build` (by David Ondrej):
    - Interactive Modal / Panel UI: Questions are presented directly in the IDE's interactive modal panel (`ask_question` tool) rather than raw chat text, featuring selectable options and an explicit `(Recommended)` first option.
    - Sequential Low-Cognitive-Load Interaction: Questions are asked strictly ONE AT A TIME.
-   - Early Termination & Scope Control: Avoids over-questioning; terminates as soon as the core path is clear.
    - Plan Synthesis & In-Place Refinement: Compiles settled decisions into an execution-ready plan or weaves them directly into an existing plan document with zero data loss.
 
 3. Delizade Directive (Strict Plan-Only & Zero-Loss In-Place Update Invariant):
@@ -28,7 +28,7 @@ of two foundational skills:
 ================================================================================
 -->
 
-Turn feature ideas, component/system updates, architectural decisions, or refactoring requests into execution-ready build specifications through autonomous codebase exploration, sequential interactive modal panels, and zero-loss in-place plan refinement or concise plan compilation.
+Turn feature ideas, component/system updates, architectural decisions, or refactoring requests into execution-ready build specifications through autonomous codebase exploration, sequential interactive modal panels, continuous deep grilling, and zero-loss in-place plan refinement or concise plan compilation.
 
 ---
 
@@ -37,12 +37,13 @@ Turn feature ideas, component/system updates, architectural decisions, or refact
 ```mermaid
 flowchart TD
     Idea["User Feature / Update / Refactor / Plan Doc"] --> Phase0["Phase 0: Silent Fact-Finding<br/>(Grep, Inspect Codebase, Verify Types & Target Plan)"]
-    Phase0 --> TreeEval{"Is there an open<br/>decision or ambiguity?"}
+    Phase0 --> TreeEval{"Is there an open decision,<br/>hidden seam, or edge case?"}
     TreeEval -- "Yes" --> Phase1["Phase 1: Ask Next Frontier Question<br/>(Interactive Modal Panel via ask_question Tool)"]
     Phase1 --> UserAnswer["User Panel Selection / Input"]
-    UserAnswer --> Recompute["Recompute Design Tree & Prune Irrelevant Branches"]
-    Recompute --> TreeEval
-    TreeEval -- "No (Settled / Frontier Empty)" --> Phase2["Phase 2: In-Place Plan Update (Zero-Loss) OR Deliver New Plan"]
+    UserAnswer --> Recompute["Recompute Design Tree & Surface Next Seam"]
+    Recompute --> HasMore{"Are there more architectural<br/>dimensions to harden?"}
+    HasMore -- "Yes (Continue Grilling Loop)" --> Phase1
+    HasMore -- "No (Thoroughly Hardened / User Ready)" --> Phase2["Phase 2: In-Place Plan Update (Zero-Loss) OR Deliver New Plan"]
     Phase2 --> Stop["Plan Ready / Updated<br/>(Execution HALTED - Zero Source Code Changes)"]
 ```
 
@@ -59,10 +60,22 @@ flowchart TD
 
 ---
 
-## Phase 1 — Interactive Panel Alignment (`ask_question` Modal Tool)
+## Phase 1 — Continuous Interactive Grilling Loop (`ask_question` Modal Tool)
 
-1. Map open decisions as a **dynamic decision tree**. Identify the single most pivotal root decision currently on the **frontier** (decisions whose prerequisites are already settled).
-2. Ask strictly **ONE question at a time**. Never bundle multiple questions together, as downstream questions often become obsolete based on the first answer.
+1. **Continuous Multi-Round Interview (CRITICAL — Anti-Premature Exit)**:
+   - **Never stop after just 1 or 2 questions.** Grilling is an exhaustive, rigorous process to interrogate assumptions, resolve trade-offs, and harden the architecture before code is written.
+   - Do NOT rush to Phase 2. Systematically traverse all key architectural dimensions across the frontier:
+     1. **Domain Ontology & Storage Seams**: SSOT, disk files vs SQLite, manifests, persistence guarantees.
+     2. **State Lifecycles & Invariants**: State transitions (`Draft -> Provisional -> Canon`), rollbacks, failure recovery.
+     3. **Cognitive Contracts & AI Gating**: Zod schemas, prompt compiling, fail-fast zero-fabrication boundaries.
+     4. **Resource Constraints & Concurrency**: GPU/VRAM locks, task queues, rate limits, caching, timeouts.
+     5. **User Experience & Interaction Boundaries**: Progressive disclosure, manual overrides vs AI suggestions, diff views.
+     6. **Edge Cases & Failure Modes**: Network drops, partial disk writes, model timeouts, contradictory user inputs.
+
+2. **Sequential One-at-a-Time Execution**:
+   - Ask strictly **ONE question at a time**. Never bundle multiple questions together.
+   - After each answer, update the internal decision model, identify the next most pivotal seam, and ask the next question immediately.
+
 3. **Mandatory Interactive Modal / Panel Invariant (CRITICAL)**:
    <formatting_directive priority="critical">
    - **NEVER output questions as raw markdown text in the chat conversation.** The user must see the question, choices, and recommendation rendered inside the IDE's interactive UI panel/modal dialog.
@@ -77,23 +90,25 @@ flowchart TD
    - **IsMultiSelect**: Set to `false` for single-choice architectural forks; set to `true` only when independent multiple options can be chosen together.
 
 5. Execution is blocked in the IDE until the user clicks an option and presses Submit in the modal panel.
-6. **Dynamic Tree Recomputation & Early Exit:**
-   - Upon receiving the user's answer from the panel, immediately update the decision tree.
-   - Prune all branches made irrelevant by this answer.
-   - If all necessary architectural, behavioral, and functional ambiguities are resolved, **terminate Phase 1 immediately** (typically 1 to 3 questions maximum). Do not ask artificial filler questions.
+
+6. **Loop Continuation & Finalization**:
+   - Continue the loop across all open dimensions.
+   - Transition to Phase 2 ONLY when:
+     1. All critical architectural dimensions, seams, and edge cases have been exhaustively probed and resolved, OR
+     2. The user explicitly requests to finalize the plan (e.g. via write-in or option).
 
 ---
 
 ## Phase 2 — Plan Synthesis & In-Place Refinement
 
-Once the frontier is resolved and no ambiguities remain, the agent delivers the settled plan according to the target context:
+Once the grilling loop is completed and all dimensions are settled, the agent delivers the plan:
 
 ### Mode A: In-Place Plan Update (When an Existing Plan Document Exists)
 If the user provides a plan document, references one in the prompt, or is actively working on a plan file (e.g. `docs/plan-*.md`, `implementation_plan.md`):
 1. **Direct In-Place Modification**: Update the target plan document directly on disk using surgical file editing tools (`replace_file_content` or `write_to_file`).
 2. **Zero-Loss Plan Preservation Protocol (CRITICAL)**:
    - **Absolute Retention of Established Knowledge**: Never summarize away, compress, or silently delete existing architectural invariants, domain rules, mathematical formulas, notes, creative context, or acceptance criteria already established in the document.
-   - **Strict Surgicality**: Content modification or removal is permitted ONLY for the exact lines, fields, or blocks directly and intentionally superseded by the newly settled decision. All unaffected sections must remain 100% intact.
+   - **Strict Surgicality**: Content modification or removal is permitted ONLY for the exact lines, fields, or blocks directly and intentionally superseded by the newly settled decisions. All unaffected sections must remain 100% intact.
    - **Structural Migration Safety**: If detailing, splitting, or reorganizing zones, dependency hierarchies, or file topologies, every existing rule and note from the previous structure must be carefully carried over into the updated layout. Zero data loss.
 3. **No Chat Bloat**: Do NOT dump the entire plan text into the chat conversation. Provide a concise, bulleted changelog highlighting what was updated in the plan file, and link to the updated document.
 
