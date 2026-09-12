@@ -1,16 +1,16 @@
 # Clarify First (Clarify & Plan Protocol - Delizade Edition)
 
-An Antigravity & Agentic IDE Skill that unifies autonomous codebase fact-finding, dynamic decision tree traversal, sequential one-at-a-time A-D questioning, and concise execution-ready implementation plan synthesis without auto-executing.
+An Antigravity & Agentic IDE Skill that unifies autonomous codebase fact-finding, dynamic decision tree traversal, interactive modal panel questioning (`ask_question` tool), and concise execution-ready implementation plan synthesis without auto-executing.
 
 ## Overview
 
 When designing features, refactoring architecture, or clarifying specifications, developers often suffer from two extremes:
-1. **The Over-Questioning Trap:** Agents asking endless open-ended questions, overwhelming the user with decision fatigue.
+1. **The Over-Questioning Trap:** Agents asking endless open-ended questions in chat, overwhelming the user with decision fatigue.
 2. **The Assumption Trap:** Agents jumping into code prematurely based on unverified assumptions, causing massive rework and diff churn.
 
 `clarify-first-delizade` provides a streamlined, zero-overhead alignment loop:
 - **Silent Fact-Finding (AI Owns Facts):** The agent autonomously inspects existing files, types, routes, and tokens. It never burdens the user with trivia that can be grepped.
-- **Sequential Dynamic Alignment (User Owns Decisions):** Open architectural decisions are queried strictly **ONE AT A TIME** with structured **A-D options** and an explicit agent recommendation (**"My pick"**).
+- **Interactive Modal Panel Alignment (User Owns Decisions):** Open architectural decisions are queried strictly **ONE AT A TIME** directly inside the IDE's interactive UI panel/modal dialog (`ask_question` tool) with clickable options and an explicit agent recommendation (**`(Recommended)`**). No raw question text cluttering chat.
 - **Dynamic Tree Pruning:** Each user answer immediately reshapes the decision tree, pruning irrelevant downstream branches and preventing useless questions.
 - **Plan-Only Invariant (No Auto-Execution):** Settled decisions are compiled into a concrete implementation plan, and execution halts immediately for user review without modifying code.
 
@@ -18,7 +18,7 @@ When designing features, refactoring architecture, or clarifying specifications,
 
 This skill is a unified synthesis and architectural evolution of two foundational skills:
 * **`grilling` (Antigravity Core / Gemini):** Provides the dynamic decision tree (frontier) model and the strict invariant that codebase fact-finding is the AI's autonomous responsibility.
-* **`ask-then-build` (by David Ondrej):** Provides the low-cognitive-load, sequential single-question format (A-D multiple choice + recommended pick).
+* **`ask-then-build` (by David Ondrej):** Provides the low-cognitive-load, sequential single-question format (now elevated to interactive modal UI panels).
 * **Delizade Directive:** Plan-only execution boundary that guarantees the agent never starts editing code or running migrations until the user explicitly requests implementation.
 
 ## Installation
@@ -38,4 +38,4 @@ cp SKILL.md .agents/skills/clarify-first-delizade/SKILL.md
 ```
 
 ## Structure
-- [`SKILL.md`](SKILL.md): Authoritative operational rules, workflow phases, formatting templates, and plan synthesis specifications.
+- [`SKILL.md`](SKILL.md): Authoritative operational rules, workflow phases, modal panel directives, and plan synthesis specifications.
