@@ -22,8 +22,12 @@ of two foundational skills:
    - 2-Question Incremental Plan Sync: Automatically persists decisions to the plan document every 2 questions, preventing context loss and maintaining an evolving specification.
    - Plan Synthesis & In-Place Refinement: Weaves settled decisions directly into an existing plan document with zero data loss (or compiles an execution-ready plan).
 
-3. Delizade Directive (Strict Plan-Only & Zero-Loss In-Place Update Invariant):
-   - Scope is strictly limited to clarification, decision resolution, and implementation planning.
+3. `domain-modeling`:
+   - Ubiquitous Language & Canonical Glossary: Actively challenge and align terminology against `CONTEXT.md`. Proactively sharpen fuzzy or overloaded domain language during grilling.
+   - Inline Ontology & ADR Crystallization: When domain boundaries, entities, or irreversible trade-offs crystallize during grilling, synchronize them with `CONTEXT.md` and `docs/adr/`.
+
+4. Delizade Directive (Strict Plan-Only & Zero-Loss In-Place Update Invariant):
+   - Scope is strictly limited to clarification, decision resolution, domain alignment, and implementation planning.
    - The agent MUST NOT touch application source code (`src/`), database migrations, or build commands.
    - If an existing plan document is referenced or active, the agent updates that document directly in-place every 2 questions with absolute preservation of established rules, invariants, and notes. It stops immediately upon delivering or finalizing the plan.
 ================================================================================
@@ -55,6 +59,7 @@ flowchart TD
 
 1. **Facts belong to the AI, never the user.** Before asking anything, autonomously inspect the repository using available search and read tools:
    - Identify affected files, call sites, exports, interfaces, domain services, database schemas, and existing UI components.
+   - Audit `CONTEXT.md` (or domain glossary) and existing ADRs (`docs/adr/` or `Architecture_Decision.md`) to establish domain vocabulary, ubiquitous language, and active architectural invariants.
    - Trace existing behaviors, edge cases, regression risks, architectural rules, and design system tokens.
    - Detect if an existing plan document is active or referenced (e.g., `docs/plan-*.md`, `implementation_plan.md`, or a file currently open/mentioned in context).
 2. **Never ask the user for facts you can look up yourself.** If a file path, function signature, current implementation, or configuration can be grepped, find it silently.
@@ -67,7 +72,11 @@ flowchart TD
 1. **Continuous Multi-Round Interview (Anti-Premature Exit)**:
    - **Never stop after just 1 or 2 questions.** Grilling is an exhaustive, rigorous process to interrogate assumptions, resolve trade-offs, and harden the architecture before code is written.
    - Do NOT rush to complete. Systematically traverse all key architectural dimensions across the frontier:
-     1. **Domain Ontology & Storage Seams**: SSOT, disk files vs SQLite, manifests, persistence guarantees.
+     1. **Domain Ontology & Ubiquitous Language (`/domain-modeling`)**:
+        - Challenge against the glossary: If the user or spec uses terms conflicting with `CONTEXT.md`, call it out immediately.
+        - Sharpen fuzzy language: Eliminate vague or overloaded terms; propose canonical domain entities.
+        - Probe boundaries with concrete scenarios: Stress-test entity lifecycles, SSOT, disk vs DB, and persistence guarantees.
+        - Offer ADRs sparingly: Propose an ADR only when hard to reverse, surprising without context, and the result of a real trade-off.
      2. **State Lifecycles & Invariants**: State transitions (`Draft -> Provisional -> Canon`), rollbacks, failure recovery.
      3. **Cognitive Contracts & AI Gating**: Zod schemas, prompt compiling, fail-fast zero-fabrication boundaries.
      4. **Resource Constraints & Concurrency**: GPU/VRAM locks, task queues, rate limits, caching, timeouts.
@@ -96,6 +105,7 @@ flowchart TD
 6. **⚡ Incremental In-Place Document Sync Cadence (Every 2 Questions)**:
    <sync_directive cadence="every_2_questions" priority="critical">
    - **Her 2 Soruda Bir Güncelleme (2-Question Cadence)**: Her 2 soru ve cevap tamamlandığında (1. ve 2. soru, ardından 3. ve 4. soru vb.), hedef plan dökümanını (`docs/plan-*.md` veya `implementation_plan.md`) o ana kadar kesinleşen kararlara göre doğrudan disk üzerinde cerrahi olarak güncelle (`replace_file_content` veya `write_to_file`).
+   - **Domain Sözlüğü & ADR Senkronizasyonu**: Grilling sırasında yeni bir kanonik domain kavramı netleşmişse `CONTEXT.md` sözlüğünü, geri dönüşü zor bir mimari karar kesinleşmişse ilgili ADR dökümanını plana paralel olarak doğrudan disk üzerinde güncelle.
    - **Zero-Loss Prensibi (Sıfır Veri Kaybı)**: Güncelleme sırasında dökümandaki mevcut kurallar, mimari değişmezler, kabul kriterleri ve notlar %100 korunur. Asla özetleme, silme veya kısaltma yapılmaz; sadece yeni kararlar dökümanın ilgili bölümlerine cerrahi olarak eklenir veya güncellenir.
    - **Grilling'e Derhal Geri Dönüş (Resume Grilling Immediately)**: Döküman güncellendikten sonra sohbette uzun metinler basarak duraklama; hemen sıradaki soruyu (`ask_question` modal paneli) açarak grilling döngüsünü kesintisiz devam ettir.
    </sync_directive>
@@ -133,7 +143,7 @@ Eğer ortada bir plan dosyası yoksa, yeni bir **Implementation Plan** derle:
 
 Bu skil kesinlikle bir **netleştirme ve planlama** skilidir.
 1. **Kaynak Kodlar Kilitlidir**: Ajan KESİNLİKLE uygulama kaynak kodlarını (`src/`) değiştiremez, veritabanı migrasyonu çalıştıramaz, paket kuramaz veya derleme komutu veremez.
-2. **İzin Verilen Tek Dosya Değişikliği**: Yalnızca üzerinde anlaşılan plan dökümanı (örneğin `docs/plan-*.md`, `implementation_plan.md`) güncellenebilir.
+2. **İzin Verilen Dosya Değişiklikleri**: Yalnızca üzerinde anlaşılan plan dökümanı (örneğin `docs/plan-*.md`, `implementation_plan.md`) ile netleşen domain model dökümanları (`CONTEXT.md`, `docs/adr/*.md`) güncellenebilir. Uygulama kaynak kodları (`src/`) kesinlikle kilitlidir.
 3. **Sıfır Veri Kaybı (Zero-Loss)**: Plan güncellenirken mevcut bağlam, formüller veya kurallar asla budanamaz.
 4. **Açık El Sıkışma (Explicit Handoff)**: Plan tamamlandıktan sonra kullanıcıya açıkça bildir:
    > *"Plan dökümanı başarıyla güncellendi ve tüm kararlar dökümana işlendi. Planı inceleyip onayladığınızda veya başlamak istediğinizde uygulamaya geçebiliriz."*
